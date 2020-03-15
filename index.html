@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>jinmei-dict</title>
+  <meta charset="UTF-8">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
+  <style type="text/css">
+    h1 {
+      padding: 0;
+      margin: 5px 0 0 10px;
+      font-size: 1.5rem;
+    }
+
+    h2 {
+      padding: 0;
+      margin: 5px 0 0 10px;
+      font-size: 1.2rem;
+    }
+    
+    a {
+      text-decoration: none;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      padding: 3px;
+    }
+
+    .item {
+      padding: 0px 20px;
+    }
+    
+    .description {
+      padding: 0;
+      margin: 0;
+    }
+
+    .message {
+      margin: 5px;
+      font-size: 0.7rem;
+    }
+
+    .github-fork-ribbon:before {
+      background-color: #333;
+    }
+  </style>
+</head>
+
+<body>
+  <a class="github-fork-ribbon" href="https://github.com/s1r-J/jinmei-dict" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+  <h1>人名漢字検索</h1>
+  <div class="item">
+    <p class="description">読み仮名から人名の漢字候補を検索して表示します。</p>
+    <p class="description">辞書データは
+      <a href="https://ja.osdn.net/projects/naist-jdic/wiki/FrontPage">NAIST-jdic</a>、
+      <a href="https://github.com/neologd/mecab-ipadic-neologd">mecab-ipadic-neologd</a>、
+      自作データを利用しています。
+    </p>
+    <p>
+      2020年3月15日時点では、姓は読み仮名が54,957語で漢字候補は99,413語、名の読み仮名が15,740語で漢字候補は111,669語となっています。
+    </p>
+  </div>
+  <h2>読み仮名から候補を検索します</h2>
+  <div class="container">
+    <div class="item" id="item-sei">
+      <input type="search" id="input-sei" placeholder="セイ">
+      <button class="search" id="search-sei" name="sei">姓を検索</button>
+      <p class="message" id='message-sei'></p>
+      <ul class="candidates" id="candidates-sei"></ul>
+    </div>
+    <div class="item">
+      <input type="search" id="input-mei" placeholder="メイ">
+      <button class="search" id="search-mei" name="mei">名を検索</button>
+      <p class="message" id='message-mei'></p>
+      <ul class="candidates" id="candidates-mei"></ul>
+    </div>
+  </div>
+  <h2>全データ</h2>
+  <div class="container">
+    <div class="item" id="item-mei">
+      <a href="https://s1r-j.github.io/jinmei-dict/jinmei/sei.json" target="_blank">姓の全データ（JSON形式）</a>
+    </div>
+    <div class="item">
+      <a href="https://s1r-j.github.io/jinmei-dict/jinmei/mei.json" target="_blank">名の全データ（JSON形式）</a>
+    </div>
+  </div>
+  <h2>課題点</h2>
+  <div class="item">
+    <ul>
+      <li>意外と基本的な異体字の姓名が不足していそう。</li>
+    </ul>
+  </div>
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script>
+    $('.search').on('click', function() {
+      const nameType = $(this).prop('name');
+      const msg = $('#message-' + nameType);
+      msg.empty();
+
+      const yomi = $('#input-' + nameType).val();
+      const regex = new RegExp('^[\u30a1-\u30fa\u30fc]+$');
+      if (!regex.test(yomi)) {
+        msg.append($('<span>', {
+          html: '入力値はカタカナにしてください'
+        }).css({
+          color: 'red'
+        }));
+        return;
+      }
+
+      $.getJSON('./jinmei/' + nameType + '.json', function(data) {
+        let candidates = data[yomi];
+        const ul = $('#candidates-' + nameType);
+        ul.empty();
+        candidates = candidates ? candidates : [];
+        for (let kaki of candidates) {
+          ul.append($('<li>', {
+            html: kaki
+          }));
+        }
+        msg.append($('<span>', {
+          html: `候補件数: ${candidates.length}件`
+        }))
+      });
+    });
+
+  </script>
+</body>
+
+</html>
